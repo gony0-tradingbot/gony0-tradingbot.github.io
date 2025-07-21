@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>System Trading Performance</title>
+  <!-- (필요하다면) Hyde CSS -->
+  <!-- <link rel="stylesheet" href="path_to_hyde_css"> -->
+
+  <!-- Google tag (gtag.js) 생략… -->
+
+  <style>
+    .container {
+      max-width: 1200px;
+      margin: auto;
+      padding: 20px;
+      position: relative;
+    }
+    img { max-width: 100%; height: auto; }
+
+    /* ── 캐로셀 공통 */
+    .strategy-carousel-wrapper {
+      position: relative;
+      margin: 20px 0;
+    }
+    .strategy-carousel {
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      gap: 16px;
+      padding-bottom: 10px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .strategy-carousel::-webkit-scrollbar { display: none; }
+
+    .strategy-item {
+      flex: 0 0 auto;
+      scroll-snap-align: start;
+      background: #f9f9f9;
+      padding: 12px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    /* 데스크탑: 두 개씩 */
+    @media (min-width: 768px) {
+      .strategy-item {
+        flex: 0 0 45%;
+      }
+    }
+    /* 모바일: 한 개씩 */
+    @media (max-width: 767px) {
+      .strategy-item {
+        flex: 0 0 90%;
+      }
+      .container { padding: 10px; }
+    }
+
+    /* ── 화살표 버튼 */
+    .carousel-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 36px; height: 36px;
+      border: none;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.5);
+      color: #fff;
+      font-size: 24px;
+      line-height: 1;
+      cursor: pointer;
+      z-index: 10;
+    }
+    .carousel-prev { left: 0; }
+    .carousel-next { right: 0; }
+
+    /* ── 인디케이터(점) */
+    .carousel-dots {
+      text-align: center;
+      margin-top: 8px;
+    }
+    .carousel-dots span {
+      display: inline-block;
+      width: 8px; height: 8px;
+      margin: 0 4px;
+      background: #ccc;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+    .carousel-dots .active {
+      background: #333;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>System Trading Performance</h1>
+      <!-- ... -->
+    </header>
+
+    <section>
+      <h2>Strategy No.5 (Portfolio) Performance</h2>
+      <!-- 메인 이미지 생략... -->
+
+      <!-- ── 캐로셀 래퍼 -->
+      <div class="strategy-carousel-wrapper">
+        <button class="carousel-btn carousel-prev">‹</button>
+        <div class="strategy-carousel">
+          <div class="strategy-item">
+            <h3>Strategy No.5-1 Performance</h3>
+            <!-- 이미지 & 링크 -->
+          </div>
+          <div class="strategy-item">
+            <h3>Strategy No.5-3 Performance Graph</h3>
+            <!-- 이미지 & 링크 -->
+          </div>
+          <!-- 나중에 더 추가 가능 -->
+        </div>
+        <button class="carousel-btn carousel-next">›</button>
+        <div class="carousel-dots"></div>
+      </div>
+    </section>
+
+    <!-- 다른 섹션들... -->
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const carousel = document.querySelector('.strategy-carousel');
+      const prevBtn = document.querySelector('.carousel-prev');
+      const nextBtn = document.querySelector('.carousel-next');
+      const dotsContainer = document.querySelector('.carousel-dots');
+      const items = Array.from(carousel.children);
+      const gap = parseInt(getComputedStyle(carousel).gap) || 16;
+      const itemWidth = items[0].getBoundingClientRect().width + gap;
+
+      // 인디케이터 점 생성
+      items.forEach((_, idx) => {
+        const dot = document.createElement('span');
+        dot.dataset.index = idx;
+        dot.addEventListener('click', () => {
+          carousel.scrollTo({ left: idx * itemWidth, behavior: 'smooth' });
+        });
+        dotsContainer.append(dot);
+      });
+
+      const dots = Array.from(dotsContainer.children);
+      function updateActiveDot() {
+        const idx = Math.round(carousel.scrollLeft / itemWidth);
+        dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+      }
+      updateActiveDot();
+
+      // 버튼 핸들러
+      prevBtn.addEventListener('click', () => {
+        carousel.scrollBy({ left: -itemWidth, behavior: 'smooth' });
+      });
+      nextBtn.addEventListener('click', () => {
+        carousel.scrollBy({ left: itemWidth, behavior: 'smooth' });
+      });
+
+      carousel.addEventListener('scroll', () => {
+        // 스크롤이 멈추고 나서 활성화 점 업데이트
+        window.clearTimeout(carousel._scrollTimer);
+        carousel._scrollTimer = window.setTimeout(updateActiveDot, 100);
+      });
+    });
+  </script>
+</body>
+</html>
+
