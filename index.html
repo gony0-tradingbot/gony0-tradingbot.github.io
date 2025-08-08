@@ -35,7 +35,7 @@
             padding-bottom: 8px;
             scroll-snap-type: x proximity;
             -webkit-overflow-scrolling: touch;
-            touch-action: pan-x;
+            touch-action: auto;
             -ms-overflow-style: none; /* IE/Edge */
             scrollbar-width: none;    /* Firefox */
         }
@@ -53,6 +53,11 @@
         img {
             max-width: 100%; /* Makes images responsive */
             height: auto; /* Maintains aspect ratio */
+        }
+        /* 상위(요약) 전략 그래프: 데스크톱 70%, 모바일 100% */
+        .strategy-card--primary img { width: 70%; }
+        @media (max-width: 768px) {
+            .strategy-card--primary img { width: 100%; }
         }
         .strategy-details > div.is-minimized img {
             filter: grayscale(100%);
@@ -111,12 +116,7 @@
             }
         }
 
-        /* Variant A: Outline offset ring (세부 전략용) */
-        .strategy-card--detail.variant-a:hover,
-        .strategy-card--detail.variant-a:focus-within {
-            outline: 2px solid rgba(59,130,246,0.5);
-            outline-offset: 3px;
-        }
+
 
         /* Variant B: Title underline with flowing gradient (세부/상위 공통) */
         .strategy-card--detail.variant-b h3 {
@@ -183,41 +183,7 @@
         .strategy-card.frame-recommend:focus-within {
             box-shadow: 0 0 0 2px rgba(59,130,246,0.25);
         }
-        /* 대안 A: 상단 헤어라인 */
-        .strategy-card--detail.frame-a::before {
-            content: "";
-            position: absolute;
-            left: 8px;
-            right: 8px;
-            top: 6px;
-            height: 1px;
-            background: linear-gradient(90deg, #60a5fa, #a78bfa, #f472b6, #f59e0b, #34d399, #60a5fa);
-            opacity: 0;
-            transform: scaleX(0.2);
-            transform-origin: left;
-            transition: opacity 0.2s ease, transform 0.25s ease;
-            pointer-events: none;
-            border-radius: 1px;
-        }
-        .strategy-card--detail.frame-a:hover,
-        .strategy-card--detail.frame-a:focus-within { border-color: transparent !important; }
-        .strategy-card--detail.frame-a:hover::before,
-        .strategy-card--detail.frame-a:focus-within::before { opacity: 0.9; transform: scaleX(1); }
-        /* 대안 B: 오버레이 아웃라인 */
-        .strategy-card--detail.frame-b::after {
-            content: "";
-            position: absolute;
-            inset: 0;
-            border: 1px solid rgba(17,17,17,0.12);
-            border-radius: 8px;
-            opacity: 0;
-            transition: opacity 0.2s ease;
-            pointer-events: none;
-        }
-        .strategy-card--detail.frame-b:hover,
-        .strategy-card--detail.frame-b:focus-within { border-color: transparent !important; }
-        .strategy-card--detail.frame-b:hover::after,
-        .strategy-card--detail.frame-b:focus-within::after { opacity: 1; }
+
         .strategy-card--primary.variant-b:hover h2::after,
         .strategy-card--primary.variant-b:focus-within h2::after {
             width: 100%;
@@ -230,25 +196,7 @@
             100% { background-position: 0% 50%; }
         }
 
-        /* Variant C: Corner accent dot (세부 전략용) */
-        .strategy-card--detail.variant-c::after {
-            content: "";
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            width: 10px;
-            height: 10px;
-            background: linear-gradient(135deg, #60a5fa, #34d399);
-            border-radius: 9999px;
-            box-shadow: 0 0 0 0 rgba(96,165,250,0.35);
-            opacity: 0;
-            transition: opacity 0.2s ease, box-shadow 0.25s ease;
-        }
-        .strategy-card--detail.variant-c:hover::after,
-        .strategy-card--detail.variant-c:focus-within::after {
-            opacity: 1;
-            box-shadow: 0 0 0 3px rgba(96,165,250,0.25);
-        }
+
 
         /* Horizontal scroll wrapper and controls */
         .strategy-scroll {
@@ -329,35 +277,7 @@
             50% { transform: translateX(-4px); opacity: 1; }
         }
 
-        /* Pagination dots */
-        .scroll-dots {
-            position: absolute;
-            bottom: 6px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            opacity: 1;
-            transition: opacity 0.2s ease;
-            z-index: 60;
-            pointer-events: none;
-        }
-        .scroll-dots .dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 9999px;
-            background: rgba(17,17,17,0.4);
-        }
-        .scroll-dots .dot.active {
-            width: 20px;
-            background: linear-gradient(90deg, #60a5fa, #a78bfa, #f472b6, #f59e0b, #34d399, #60a5fa);
-            background-size: 200% 100%;
-            animation: gradient-flow 4s linear infinite;
-        }
-        .strategy-scroll:not(.has-overflow) .scroll-dots { opacity: 1; }
-        /* 도트/메타 비표시 요구 대응 */
-        .scroll-dots, .scroll-meta { display: none !important; }
+        /* 도트/메타 UI 제거 */
 
         /* 오버플로우 보장을 위한 최소 너비(안전장치) */
         .strategy-details.no5-list > div { min-width: 260px; }
@@ -376,7 +296,7 @@
             <div class="strategy-card strategy-card--primary variant-b frame-recommend">
                 <h2>Strategy No.5 (Portfolio) Performance</h2>
                 <a href="https://gony0-tradingbot.github.io/qs/no5/portfolio_report.png" target="_blank">
-                    <img src="https://github.com/gony0-tradingbot/gony0-tradingbot.github.io/blob/main/qs/no5/portfolio_report.png?raw=true" alt="Strategy No.5 (Portfolio) Performance Graph" style="width:70%;">
+                    <img src="https://github.com/gony0-tradingbot/gony0-tradingbot.github.io/blob/main/qs/no5/portfolio_report.png?raw=true" alt="Strategy No.5 (Portfolio) Performance Graph">
                 </a>
                 <p><a class="detail-link" href="https://gony0-tradingbot.github.io/qs/no5/portfolio_report.html">View No.5 (Portfolio) Details (QuantStats📈)</a></p>
             </div>
@@ -417,15 +337,14 @@
                     <span>Scroll for more</span>
                     <span class="chev right">&gt;</span>
                 </div>
-                <div class="scroll-dots" aria-hidden="true"></div>
-                <div class="scroll-meta" aria-hidden="true"></div>
+
             </div>
         </section>
         <section>
             <div class="strategy-card strategy-card--primary variant-b frame-recommend">
-                <h2>Strategy No.3 Performance Graph</h2>
+                <h2>Strategy No.3 Performance</h2>
                 <a href="https://gony0-tradingbot.github.io/qs/no3.png" target="_blank">
-                    <img src="https://github.com/gony0-tradingbot/gony0-tradingbot.github.io/blob/main/qs/no3.png?raw=true" alt="Strategy No.3 Performance Graph" style="width:70%;">
+                    <img src="https://github.com/gony0-tradingbot/gony0-tradingbot.github.io/blob/main/qs/no3.png?raw=true" alt="Strategy No.3 Performance Graph">
                 </a>
                 <p><a class="detail-link" href="https://gony0-tradingbot.github.io/qs/no3.html">View No.3 Details (QuantStats📈)</a></p>
             </div>
@@ -510,66 +429,12 @@
 
 
 
-                // Dots/meta builders (single definition)
-                const dotsContainer = wrapper.querySelector('.scroll-dots');
-                const buildDots = () => {
-                    if (!dotsContainer) return;
-                    dotsContainer.innerHTML = '';
-                    const count = scroller.children.length;
-                    for (let i = 0; i < count; i += 1) {
-                        const dot = document.createElement('span');
-                        dot.className = 'dot';
-                        dotsContainer.appendChild(dot);
-                    }
-                };
-                const updateDots = () => {
-                    if (!dotsContainer) return;
-                    if (!dotsContainer.childElementCount) buildDots();
-                    const dots = dotsContainer.querySelectorAll('.dot');
-                    if (!dots.length) return;
-                    const cards = Array.from(scroller.children);
-                    let activeIndex = 0;
-                    let maxVisible = 0;
-                    const viewportLeft = scroller.scrollLeft;
-                    const viewportRight = viewportLeft + scroller.clientWidth;
-                    cards.forEach((card, index) => {
-                        const rectLeft = card.offsetLeft;
-                        const rectRight = rectLeft + card.clientWidth;
-                        const visible = Math.max(0, Math.min(viewportRight, rectRight) - Math.max(viewportLeft, rectLeft));
-                        if (visible > maxVisible) {
-                            maxVisible = visible;
-                            activeIndex = index;
-                        }
-                    });
-                    dots.forEach((d, i) => d.classList.toggle('active', i === activeIndex));
-                };
-                const metaEl = wrapper.querySelector('.scroll-meta');
-                const updateMeta = () => {
-                    if (!metaEl) return;
-                    const cards = Array.from(scroller.children);
-                    const total = cards.length;
-                    const viewportLeft = scroller.scrollLeft;
-                    const viewportRight = viewportLeft + scroller.clientWidth;
-                    let first = total;
-                    let last = 0;
-                    cards.forEach((card, index) => {
-                        const left = card.offsetLeft;
-                        const right = left + card.clientWidth;
-                        const visible = Math.max(0, Math.min(viewportRight, right) - Math.max(viewportLeft, left));
-                        if (visible > 8) {
-                            first = Math.min(first, index + 1);
-                            last = Math.max(last, index + 1);
-                        }
-                    });
-                    metaEl.textContent = first <= last ? `${first}–${last} of ${total}` : `0 of ${total}`;
-                };
+                // 도트/메타 UI 제거됨
 
                 // Overflow state + initial UI
                 const updateUI = () => {
                     const maxScrollLeft = scroller.scrollWidth - scroller.clientWidth;
                     wrapper.classList.toggle('has-overflow', maxScrollLeft > 1);
-                    updateDots();
-                    updateMeta();
                 };
                 const ro = new ResizeObserver(updateUI);
                 ro.observe(scroller);
@@ -586,18 +451,18 @@
                     });
                 }
 
-                // Wheel to horizontal scroll on wrapper (covers hint + scroller)
+                // Wheel/trackpad: 가로 제스처만 가로 스크롤로 전환, 세로는 기본 동작 유지
                 wrapper.addEventListener('wheel', (e) => {
-                    const isHorizontal = Math.abs(e.deltaX) > Math.abs(e.deltaY);
-                    const delta = isHorizontal ? e.deltaX : e.deltaY;
-                    if (delta !== 0) {
+                    const hasHorizontalOverflow = scroller.scrollWidth > scroller.clientWidth + 1;
+                    const isMostlyHorizontal = Math.abs(e.deltaX) > Math.abs(e.deltaY);
+                    if (hasHorizontalOverflow && isMostlyHorizontal && e.deltaX !== 0) {
                         e.preventDefault();
-                        scroller.scrollLeft += delta;
+                        scroller.scrollLeft += e.deltaX;
                     }
                 }, { passive: false });
 
-                // Keep dots/meta in sync during scroll
-                scroller.addEventListener('scroll', () => { updateDots(); updateMeta(); }, { passive: true });
+                // 스크롤 상태 유지용 no-op (도트/메타 제거)
+                scroller.addEventListener('scroll', () => {}, { passive: true });
             });
         })();
     </script>
