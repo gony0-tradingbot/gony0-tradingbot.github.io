@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Daily updated system trading performance reports and QuantStats for multiple strategies.">
     <title>System Trading Performance</title>
     <!-- Hyde CSS link here -->
     <!--link rel="stylesheet" href="path_to_hyde_css"-->
@@ -24,18 +25,343 @@
         }
         .strategy-details {
             display: flex;
-            justify-content: space-around;
-            align-items: left;
+            justify-content: flex-start;
+            align-items: stretch;
+            /* 카드 간격 변수화 */
+            --card-gap: 16px;
+            gap: var(--card-gap, 16px);
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding-bottom: 8px;
+            scroll-snap-type: x proximity;
+            -webkit-overflow-scrolling: touch;
+            touch-action: pan-x;
+            -ms-overflow-style: none; /* IE/Edge */
+            scrollbar-width: none;    /* Firefox */
+        }
+        .strategy-details::-webkit-scrollbar { /* Chrome/Safari */
+            display: none;
         }
         .strategy-details > div {
-            flex-basis: 45%; /* Adjusts the base size of each child */
             text-align: left; /* Centers the text and images inside the div */
+            scroll-snap-align: start;
+        }
+        /* No.5 전용: 3.5개 카드 보이도록 폭 산출 (컨테이너 기준) */
+        .strategy-details.no5-list > div {
+            flex: 0 0 calc((100% - 3 * var(--card-gap, 16px)) / 3.5);
         }
         img {
             max-width: 100%; /* Makes images responsive */
             height: auto; /* Maintains aspect ratio */
         }
-    </style>    
+        .strategy-details > div.is-minimized img {
+            filter: grayscale(100%);
+        }
+        /* 카드 기본 규칙 */
+        .strategy-card a { text-decoration: underline; }
+        /* Detail 링크는 모두 검정색(hover에도 유지) */
+        .detail-link {
+            color: #111;
+        }
+        .detail-link:hover,
+        .detail-link:focus-visible {
+            color: #111;
+        }
+        /* 세부 전략은 항상 본래 색 유지 (예외: minimized) */
+        .strategy-card--detail h3,
+        .strategy-card--detail p,
+        .strategy-card--detail a {
+            color: inherit;
+        }
+        .strategy-card--detail.is-minimized:not(:hover) h3,
+        .strategy-card--detail.is-minimized:not(:hover) p:not(.status-badge),
+        .strategy-card--detail.is-minimized:not(:hover) a {
+            color: #6b7280; /* gray-600 */
+        }
+        .strategy-card {
+            position: relative;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            padding: 8px;
+            transition: border-color 0.2s ease, background-color 0.2s ease;
+        }
+        /* Primary left-side indicator 제거: 상단/제목 밑줄을 사용 */
+        .strategy-card:hover,
+        .strategy-card:focus-within {
+            border-color: #e5e7eb; /* gray-200 */
+            background: rgba(0,0,0,0.015);
+        }
+
+        /* Top-level cards only: emphasize title weight on hover */
+        .strategy-card--primary:hover h2,
+        .strategy-card--primary:focus-within h2 {
+            font-weight: 700;
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .strategy-card,
+            .strategy-card--primary::before {
+                transition: none;
+            }
+            .strategy-card--detail.variant-b h3::after,
+            .strategy-card--primary.variant-b h2::after {
+                animation: none !important;
+            }
+            .strategy-card--detail.variant-b h3::after {
+                animation: none;
+            }
+        }
+
+        /* Variant A: Outline offset ring (세부 전략용) */
+        .strategy-card--detail.variant-a:hover,
+        .strategy-card--detail.variant-a:focus-within {
+            outline: 2px solid rgba(59,130,246,0.5);
+            outline-offset: 3px;
+        }
+
+        /* Variant B: Title underline with flowing gradient (세부/상위 공통) */
+        .strategy-card--detail.variant-b h3 {
+            position: relative;
+            display: inline-block;
+        }
+        .strategy-card--detail.variant-b h3::after {
+            content: "";
+            position: absolute;
+            left: 50%;
+            bottom: -4px;
+            height: 2px;
+            width: 0;
+            transform: translateX(-50%);
+            background: linear-gradient(90deg, #60a5fa, #a78bfa, #f472b6, #f59e0b, #34d399, #60a5fa);
+            background-size: 200% 100%;
+            opacity: 0;
+            border-radius: 2px;
+            transition: width 0.25s ease, opacity 0.2s ease;
+        }
+        .strategy-card--detail.variant-b:hover h3::after,
+        .strategy-card--detail.variant-b:focus-within h3::after {
+            width: 100%;
+            opacity: 1;
+            animation: gradient-flow 4s linear infinite;
+        }
+
+        /* No.5 세부 전략 카드: 상위(4px) 대비 1px 얇게(3px) */
+        .strategy-details.no5-list .strategy-card--detail.variant-b h3::after {
+            height: 3px;
+        }
+
+        /* Minimized(No.5-1): 밑줄 그라디언트도 그레이스케일 처리 */
+        .strategy-card--detail.variant-b.is-minimized h3::after {
+            filter: grayscale(100%);
+        }
+
+        /* 상위 카드(요약)에도 동일 효과 적용: h2 밑줄 */
+        .strategy-card--primary.variant-b h2 {
+            position: relative;
+            display: inline-block;
+        }
+        .strategy-card--primary.variant-b h2::after {
+            content: "";
+            position: absolute;
+            left: 50%;
+            bottom: -6px;
+            height: 4px;
+            width: 0;
+            transform: translateX(-50%);
+            background: linear-gradient(90deg, #60a5fa, #a78bfa, #f472b6, #f59e0b, #34d399, #60a5fa);
+            background-size: 200% 100%;
+            opacity: 0;
+            border-radius: 3px;
+            transition: width 0.25s ease, opacity 0.2s ease;
+        }
+        /* 프레임 스타일: 추천안/대안A/대안B */
+        /* 추천안: 테두리 없이 배경만 은은히, 포커스 시 링 */
+        .strategy-card.frame-recommend:hover,
+        .strategy-card.frame-recommend:focus-within {
+            border-color: transparent !important;
+            background: rgba(0,0,0,0.02);
+        }
+        .strategy-card.frame-recommend:focus-within {
+            box-shadow: 0 0 0 2px rgba(59,130,246,0.25);
+        }
+        /* 대안 A: 상단 헤어라인 */
+        .strategy-card--detail.frame-a::before {
+            content: "";
+            position: absolute;
+            left: 8px;
+            right: 8px;
+            top: 6px;
+            height: 1px;
+            background: linear-gradient(90deg, #60a5fa, #a78bfa, #f472b6, #f59e0b, #34d399, #60a5fa);
+            opacity: 0;
+            transform: scaleX(0.2);
+            transform-origin: left;
+            transition: opacity 0.2s ease, transform 0.25s ease;
+            pointer-events: none;
+            border-radius: 1px;
+        }
+        .strategy-card--detail.frame-a:hover,
+        .strategy-card--detail.frame-a:focus-within { border-color: transparent !important; }
+        .strategy-card--detail.frame-a:hover::before,
+        .strategy-card--detail.frame-a:focus-within::before { opacity: 0.9; transform: scaleX(1); }
+        /* 대안 B: 오버레이 아웃라인 */
+        .strategy-card--detail.frame-b::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border: 1px solid rgba(17,17,17,0.12);
+            border-radius: 8px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            pointer-events: none;
+        }
+        .strategy-card--detail.frame-b:hover,
+        .strategy-card--detail.frame-b:focus-within { border-color: transparent !important; }
+        .strategy-card--detail.frame-b:hover::after,
+        .strategy-card--detail.frame-b:focus-within::after { opacity: 1; }
+        .strategy-card--primary.variant-b:hover h2::after,
+        .strategy-card--primary.variant-b:focus-within h2::after {
+            width: 100%;
+            opacity: 1;
+            animation: gradient-flow 4s linear infinite;
+        }
+
+        @keyframes gradient-flow {
+            0% { background-position: 200% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Variant C: Corner accent dot (세부 전략용) */
+        .strategy-card--detail.variant-c::after {
+            content: "";
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 10px;
+            height: 10px;
+            background: linear-gradient(135deg, #60a5fa, #34d399);
+            border-radius: 9999px;
+            box-shadow: 0 0 0 0 rgba(96,165,250,0.35);
+            opacity: 0;
+            transition: opacity 0.2s ease, box-shadow 0.25s ease;
+        }
+        .strategy-card--detail.variant-c:hover::after,
+        .strategy-card--detail.variant-c:focus-within::after {
+            opacity: 1;
+            box-shadow: 0 0 0 3px rgba(96,165,250,0.25);
+        }
+
+        /* Horizontal scroll wrapper and controls */
+        .strategy-scroll {
+            position: relative;
+            padding: 0; /* 컨테이너 패딩과 일치 */
+        }
+        /* No.5 전용: 컨테이너 정렬 유지 (풀-블리드 해제) */
+        .strategy-scroll.no5-scroll {
+            width: auto;
+            left: auto;
+            right: auto;
+            margin-left: 0;
+            margin-right: 0;
+            padding-left: 0;
+            padding-right: 0;
+        }
+        .strategy-details {
+            cursor: grab;
+        }
+        .strategy-details.dragging {
+            cursor: grabbing;
+            user-select: none;
+            -webkit-user-select: none;
+            scroll-snap-type: none; /* 드래그 중 스냅 비활성화로 부드러운 드래그 */
+        }
+
+        /* 스크롤 힌트 */
+        .scroll-hint {
+            position: absolute;
+            bottom: 6px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(90deg,
+                rgba(96,165,250,0.92), /* blue-400 */
+                rgba(167,139,250,0.92), /* violet-400 */
+                rgba(244,114,182,0.92), /* pink-400 */
+                rgba(245,158,11,0.92),  /* amber-500 */
+                rgba(52,211,153,0.92),  /* emerald-400 */
+                rgba(96,165,250,0.92)   /* blue-400 */
+            );
+            background-size: 200% 100%;
+            animation: gradient-flow 6s linear infinite;
+            color: #fff;
+            font-size: 13px;
+            line-height: 1;
+            padding: 8px 12px;
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            opacity: 0;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            border: 1px solid rgba(255,255,255,0.15);
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            white-space: nowrap;
+            z-index: 40;
+        }
+        .strategy-scroll.has-overflow .scroll-hint { opacity: 1; pointer-events: auto; cursor: pointer; }
+        .scroll-hint .chev {
+            animation: hint-nudge-right 1.2s ease-in-out infinite;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 1em;
+            height: 1em;
+            line-height: 1;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        }
+        .scroll-hint .chev.left { animation-name: hint-nudge-left; }
+        .scroll-hint .chev.right { animation-name: hint-nudge-right; }
+        @keyframes hint-nudge-right {
+            0%, 100% { transform: translateX(0); opacity: 0.8; }
+            50% { transform: translateX(4px); opacity: 1; }
+        }
+        @keyframes hint-nudge-left {
+            0%, 100% { transform: translateX(0); opacity: 0.8; }
+            50% { transform: translateX(-4px); opacity: 1; }
+        }
+
+        /* Pagination dots */
+        .scroll-dots {
+            position: absolute;
+            bottom: 6px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            opacity: 1;
+            transition: opacity 0.2s ease;
+            z-index: 60;
+            pointer-events: none;
+        }
+        .scroll-dots .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 9999px;
+            background: rgba(17,17,17,0.4);
+        }
+        .scroll-dots .dot.active {
+            width: 20px;
+            background: linear-gradient(90deg, #60a5fa, #a78bfa, #f472b6, #f59e0b, #34d399, #60a5fa);
+            background-size: 200% 100%;
+            animation: gradient-flow 4s linear infinite;
+        }
+        .strategy-scroll:not(.has-overflow) .scroll-dots { opacity: 1; }
+        /* 도트/메타 비표시 요구 대응 */
+        .scroll-dots, .scroll-meta { display: none !important; }
+
+        /* 오버플로우 보장을 위한 최소 너비(안전장치) */
+        .strategy-details.no5-list > div { min-width: 260px; }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -47,43 +373,234 @@
             </p>
         </header>
         <section>
-            <h2>Strategy No.5 (Portfolio) Performance</h2>
-            <a href="https://gony0-tradingbot.github.io/qs/no5/portfolio_report.png" target="_blank">
-                <img src="https://github.com/gony0-tradingbot/gony0-tradingbot.github.io/blob/main/qs/no5/portfolio_report.png?raw=true" alt="Strategy No.5 (Portfolio) Performance Graph" style="width:70%;">
-            </a>
-            <p><a href="https://gony0-tradingbot.github.io/qs/no5/portfolio_report.html">View No.5 (Portfolio) Details (QuantStats📈)</a></p>
-            <div class="strategy-details">
-                <div>
+            <div class="strategy-card strategy-card--primary variant-b frame-recommend">
+                <h2>Strategy No.5 (Portfolio) Performance</h2>
+                <a href="https://gony0-tradingbot.github.io/qs/no5/portfolio_report.png" target="_blank">
+                    <img src="https://github.com/gony0-tradingbot/gony0-tradingbot.github.io/blob/main/qs/no5/portfolio_report.png?raw=true" alt="Strategy No.5 (Portfolio) Performance Graph" style="width:70%;">
+                </a>
+                <p><a class="detail-link" href="https://gony0-tradingbot.github.io/qs/no5/portfolio_report.html">View No.5 (Portfolio) Details (QuantStats📈)</a></p>
+            </div>
+            <div class="strategy-scroll no5-scroll">
+                <div class="strategy-details no5-list">
+                    <div class="strategy-card strategy-card--detail variant-b frame-recommend is-minimized">
                     <h3>Strategy No.5-1 Performance</h3>
                     <a href="https://gony0-tradingbot.github.io/qs/no5/st1_report.png" target="_blank">
                         <img src="https://github.com/gony0-tradingbot/gony0-tradingbot.github.io/blob/main/qs/no5/st1_report.png?raw=true" alt="Strategy No.5-1 Performance Graph">
                     </a>
-                    <p></p><strong>⚠️ Minimized since Jul ’24 (MDD breach)</strong></p>
-                    <p><a href="https://gony0-tradingbot.github.io/qs/no5/st1_report.html">View No.5-1 Details (QuantStats📈)</a></p>
+                        <p class="status-badge"><strong>⚠️ Minimized since Jul ’24 (MDD breach)</strong></p>
+                    <p><a class="detail-link" href="https://gony0-tradingbot.github.io/qs/no5/st1_report.html">View No.5-1 Details (QuantStats📈)</a></p>
                 </div>
-                <div>
+                    <div class="strategy-card strategy-card--detail variant-b frame-recommend">
                     <h3>Strategy No.5-3 Performance</h3>
                     <a href="https://gony0-tradingbot.github.io/qs/no5/st3_report.png" target="_blank">
                         <img src="https://github.com/gony0-tradingbot/gony0-tradingbot.github.io/blob/main/qs/no5/st3_report.png?raw=true" alt="Strategy No.5-3 Performance Graph">
                     </a>
-                    <p><a href="https://gony0-tradingbot.github.io/qs/no5/st3_report.html">View No.5-3 Details (QuantStats📈)</a></p>
+                    <p><a class="detail-link" href="https://gony0-tradingbot.github.io/qs/no5/st3_report.html">View No.5-3 Details (QuantStats📈)</a></p>
                 </div>
-                <div>
+                    <div class="strategy-card strategy-card--detail variant-b frame-recommend">
                     <h3>Strategy No.5-5 Performance</h3>
                     <a href="https://gony0-tradingbot.github.io/qs/no5/st5_report.png" target="_blank">
                         <img src="https://github.com/gony0-tradingbot/gony0-tradingbot.github.io/blob/main/qs/no5/st5_report.png?raw=true" alt="Strategy No.5-5 Performance Graph">
                     </a>
-                    <p><a href="https://gony0-tradingbot.github.io/qs/no5/st5_report.html">View No.5-5 Details (QuantStats📈)</a></p>
+                    <p><a class="detail-link" href="https://gony0-tradingbot.github.io/qs/no5/st5_report.html">View No.5-5 Details (QuantStats📈)</a></p>
                 </div>
+                    <div class="strategy-card strategy-card--detail variant-b frame-recommend">
+                    <h3>Strategy No.5-6 Performance</h3>
+                    <a href="https://gony0-tradingbot.github.io/qs/no5/st6_report.png" target="_blank">
+                        <img src="https://github.com/gony0-tradingbot/gony0-tradingbot.github.io/blob/main/qs/no5/st6_report.png?raw=true" alt="Strategy No.5-6 Performance Graph">
+                    </a>
+                    <p><a class="detail-link" href="https://gony0-tradingbot.github.io/qs/no5/st6_report.html">View No.5-6 Details (QuantStats📈)</a></p>
+                </div>
+                </div>
+                <div class="scroll-hint" aria-hidden="true">
+                    <span class="chev left">&lt;</span>
+                    <span>Scroll for more</span>
+                    <span class="chev right">&gt;</span>
+                </div>
+                <div class="scroll-dots" aria-hidden="true"></div>
+                <div class="scroll-meta" aria-hidden="true"></div>
             </div>
         </section>
         <section>
-            <h2>Strategy No.3 Performance Graph</h2>
-            <a href="https://gony0-tradingbot.github.io/qs/no3.png" target="_blank">
-                <img src="https://github.com/gony0-tradingbot/gony0-tradingbot.github.io/blob/main/qs/no3.png?raw=true" alt="Strategy No.3 Performance Graph" style="width:70%;">
-            </a>
-            <p><a href="https://gony0-tradingbot.github.io/qs/no3.html">View No.3 Details (QuantStats📈)</a></p>
+            <div class="strategy-card strategy-card--primary variant-b frame-recommend">
+                <h2>Strategy No.3 Performance Graph</h2>
+                <a href="https://gony0-tradingbot.github.io/qs/no3.png" target="_blank">
+                    <img src="https://github.com/gony0-tradingbot/gony0-tradingbot.github.io/blob/main/qs/no3.png?raw=true" alt="Strategy No.3 Performance Graph" style="width:70%;">
+                </a>
+                <p><a class="detail-link" href="https://gony0-tradingbot.github.io/qs/no3.html">View No.3 Details (QuantStats📈)</a></p>
+            </div>
         </section>
     </div>
+    <script>
+        (function () {
+            const wrappers = document.querySelectorAll('.strategy-scroll');
+            wrappers.forEach((wrapper) => {
+                const scroller = wrapper.querySelector('.strategy-details');
+                if (!scroller) return;
+
+                // 이미지 기본 드래그 방지(PC에서 스크롤 드래그에 간섭하지 않도록)
+                scroller.querySelectorAll('img').forEach((img) => {
+                    img.setAttribute('draggable', 'false');
+                });
+                scroller.addEventListener('dragstart', (e) => e.preventDefault());
+
+                const getAmount = () => Math.max(240, Math.floor(scroller.clientWidth * 0.8));
+                const smoothScroll = (dir) => {
+                    scroller.scrollBy({ left: dir * getAmount(), behavior: 'smooth' });
+                };
+
+                // Drag to scroll (mouse)
+                let isDown = false;
+                let startX = 0;
+                let startScrollLeft = 0;
+                let moved = false;
+
+                scroller.addEventListener('mousedown', (e) => {
+                    // Only left mouse button
+                    if (e.button !== 0) return;
+                    e.preventDefault();
+                    isDown = true;
+                    moved = false;
+                    scroller.classList.add('dragging');
+                    startX = e.clientX - scroller.getBoundingClientRect().left;
+                    startScrollLeft = scroller.scrollLeft;
+                });
+                window.addEventListener('mouseup', () => {
+                    isDown = false;
+                    scroller.classList.remove('dragging');
+                });
+                scroller.addEventListener('mouseleave', () => {
+                    isDown = false;
+                    scroller.classList.remove('dragging');
+                });
+                scroller.addEventListener('mousemove', (e) => {
+                    if (!isDown) return;
+                    e.preventDefault();
+                    const x = e.clientX - scroller.getBoundingClientRect().left;
+                    const walk = x - startX;
+                    if (Math.abs(walk) > 3) moved = true;
+                    scroller.scrollLeft = startScrollLeft - walk;
+                });
+
+                // Touch drag (mobile)
+                let touchStartX = 0;
+                let touchStartScrollLeft = 0;
+                scroller.addEventListener('touchstart', (e) => {
+                    if (!e.touches || e.touches.length !== 1) return;
+                    touchStartX = e.touches[0].clientX;
+                    touchStartScrollLeft = scroller.scrollLeft;
+                }, { passive: true });
+                scroller.addEventListener('touchmove', (e) => {
+                    if (!e.touches || e.touches.length !== 1) return;
+                    const dx = e.touches[0].clientX - touchStartX;
+                    scroller.scrollLeft = touchStartScrollLeft - dx;
+                }, { passive: true });
+                // Prevent clicks on links when user was dragging
+                scroller.addEventListener(
+                    'click',
+                    (e) => {
+                        if (moved) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                        }
+                        moved = false;
+                    },
+                    true
+                );
+
+
+
+                // Dots/meta builders (single definition)
+                const dotsContainer = wrapper.querySelector('.scroll-dots');
+                const buildDots = () => {
+                    if (!dotsContainer) return;
+                    dotsContainer.innerHTML = '';
+                    const count = scroller.children.length;
+                    for (let i = 0; i < count; i += 1) {
+                        const dot = document.createElement('span');
+                        dot.className = 'dot';
+                        dotsContainer.appendChild(dot);
+                    }
+                };
+                const updateDots = () => {
+                    if (!dotsContainer) return;
+                    if (!dotsContainer.childElementCount) buildDots();
+                    const dots = dotsContainer.querySelectorAll('.dot');
+                    if (!dots.length) return;
+                    const cards = Array.from(scroller.children);
+                    let activeIndex = 0;
+                    let maxVisible = 0;
+                    const viewportLeft = scroller.scrollLeft;
+                    const viewportRight = viewportLeft + scroller.clientWidth;
+                    cards.forEach((card, index) => {
+                        const rectLeft = card.offsetLeft;
+                        const rectRight = rectLeft + card.clientWidth;
+                        const visible = Math.max(0, Math.min(viewportRight, rectRight) - Math.max(viewportLeft, rectLeft));
+                        if (visible > maxVisible) {
+                            maxVisible = visible;
+                            activeIndex = index;
+                        }
+                    });
+                    dots.forEach((d, i) => d.classList.toggle('active', i === activeIndex));
+                };
+                const metaEl = wrapper.querySelector('.scroll-meta');
+                const updateMeta = () => {
+                    if (!metaEl) return;
+                    const cards = Array.from(scroller.children);
+                    const total = cards.length;
+                    const viewportLeft = scroller.scrollLeft;
+                    const viewportRight = viewportLeft + scroller.clientWidth;
+                    let first = total;
+                    let last = 0;
+                    cards.forEach((card, index) => {
+                        const left = card.offsetLeft;
+                        const right = left + card.clientWidth;
+                        const visible = Math.max(0, Math.min(viewportRight, right) - Math.max(viewportLeft, left));
+                        if (visible > 8) {
+                            first = Math.min(first, index + 1);
+                            last = Math.max(last, index + 1);
+                        }
+                    });
+                    metaEl.textContent = first <= last ? `${first}–${last} of ${total}` : `0 of ${total}`;
+                };
+
+                // Overflow state + initial UI
+                const updateUI = () => {
+                    const maxScrollLeft = scroller.scrollWidth - scroller.clientWidth;
+                    wrapper.classList.toggle('has-overflow', maxScrollLeft > 1);
+                    updateDots();
+                    updateMeta();
+                };
+                const ro = new ResizeObserver(updateUI);
+                ro.observe(scroller);
+                window.addEventListener('resize', updateUI);
+                updateUI();
+
+                // Hint interactions: 항상 표시(숨김 없음), 좌/우 클릭 스크롤
+                const hintEl = wrapper.querySelector('.scroll-hint');
+                if (hintEl) {
+                    hintEl.addEventListener('click', (e) => {
+                        const rect = hintEl.getBoundingClientRect();
+                        const isLeft = (e.clientX - rect.left) < rect.width / 2;
+                        scroller.scrollBy({ left: (isLeft ? -1 : 1) * getAmount(), behavior: 'smooth' });
+                    });
+                }
+
+                // Wheel to horizontal scroll on wrapper (covers hint + scroller)
+                wrapper.addEventListener('wheel', (e) => {
+                    const isHorizontal = Math.abs(e.deltaX) > Math.abs(e.deltaY);
+                    const delta = isHorizontal ? e.deltaX : e.deltaY;
+                    if (delta !== 0) {
+                        e.preventDefault();
+                        scroller.scrollLeft += delta;
+                    }
+                }, { passive: false });
+
+                // Keep dots/meta in sync during scroll
+                scroller.addEventListener('scroll', () => { updateDots(); updateMeta(); }, { passive: true });
+            });
+        })();
+    </script>
 </body>
 </html>
+
