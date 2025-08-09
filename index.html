@@ -50,6 +50,10 @@
         .strategy-details.no5-list > div {
             flex: 0 0 calc((100% - 3 * var(--card-gap, 16px)) / 3.5);
         }
+        /* 모바일에서는 70% 폭으로 카드 연속 노출(2장 이상 동시 시야) */
+        @media (max-width: 768px) {
+            .strategy-details.no5-list > div { flex: 0 0 70%; }
+        }
         img {
             max-width: 100%; /* Makes images responsive */
             height: auto; /* Maintains aspect ratio */
@@ -61,13 +65,13 @@
         @media (max-width: 768px) {
             .strategy-card--primary img { width: 100%; }
         }
-        /* 모바일: No.5-* 세부 전략 이미지 최대 70% */
+        /* 모바일: No.5-* 세부 전략 전체 비율 축소 및 내용 폭 제한(연속 노출 유지) */
         @media (max-width: 768px) {
             .strategy-details.no5-list .strategy-card--detail { font-size: 0.9em; }
             .strategy-details.no5-list .strategy-card--detail h3,
             .strategy-details.no5-list .strategy-card--detail p,
-            .strategy-details.no5-list .strategy-card--detail a { max-width: 70%; }
-            .strategy-details.no5-list .strategy-card--detail img { width: 70%; }
+            .strategy-details.no5-list .strategy-card--detail a { max-width: 100%; }
+            .strategy-details.no5-list .strategy-card--detail img { width: 100%; }
         }
         .strategy-details > div.is-minimized img {
             filter: grayscale(100%);
@@ -291,6 +295,10 @@
 
         /* 오버플로우 보장을 위한 최소 너비(안전장치) */
         .strategy-details.no5-list > div { min-width: 260px; }
+        /* 모바일에서는 최소너비 제한 해제하여 여러 카드가 연속 노출되도록 */
+        @media (max-width: 768px) {
+            .strategy-details.no5-list > div { min-width: 0 !important; }
+        }
     </style>
 </head>
 <body>
