@@ -38,6 +38,7 @@
             touch-action: auto;
             -ms-overflow-style: none; /* IE/Edge */
             scrollbar-width: none;    /* Firefox */
+            scroll-behavior: smooth;
         }
         .strategy-details::-webkit-scrollbar { /* Chrome/Safari */
             display: none;
@@ -46,6 +47,8 @@
             text-align: left; /* Centers the text and images inside the div */
             scroll-snap-align: start;
         }
+        /* No.5: 스냅 비활성화로 자유 스크롤을 부드럽게 */
+        .strategy-details.no5-list { scroll-snap-type: none; }
         /* No.5 전용: 3.5개 카드 보이도록 폭 산출 (컨테이너 기준) */
         .strategy-details.no5-list > div {
             flex: 0 0 calc((100% - 3 * var(--card-gap, 16px)) / 3.5);
@@ -423,19 +426,7 @@
                     scroller.scrollLeft = startScrollLeft - walk;
                 });
 
-                // Touch drag (mobile)
-                let touchStartX = 0;
-                let touchStartScrollLeft = 0;
-                scroller.addEventListener('touchstart', (e) => {
-                    if (!e.touches || e.touches.length !== 1) return;
-                    touchStartX = e.touches[0].clientX;
-                    touchStartScrollLeft = scroller.scrollLeft;
-                }, { passive: true });
-                scroller.addEventListener('touchmove', (e) => {
-                    if (!e.touches || e.touches.length !== 1) return;
-                    const dx = e.touches[0].clientX - touchStartX;
-                    scroller.scrollLeft = touchStartScrollLeft - dx;
-                }, { passive: true });
+                // Touch: 네이티브 가로 스크롤/관성을 그대로 사용 (커스텀 처리 제거)
                 // Prevent clicks on links when user was dragging
                 scroller.addEventListener(
                     'click',
@@ -475,13 +466,8 @@
 
                 // Wheel/trackpad: 가로 제스처만 가로 스크롤로 전환, 세로는 기본 동작 유지
                 wrapper.addEventListener('wheel', (e) => {
-                    const hasHorizontalOverflow = scroller.scrollWidth > scroller.clientWidth + 1;
-                    const isMostlyHorizontal = Math.abs(e.deltaX) > Math.abs(e.deltaY);
-                    if (hasHorizontalOverflow && isMostlyHorizontal && e.deltaX !== 0) {
-                        e.preventDefault();
-                        scroller.scrollLeft += e.deltaX;
-                    }
-                }, { passive: false });
+                    // 기본 브라우저 동작(관성/부드러운 스크롤)을 사용
+                }, { passive: true });
 
                 // 스크롤 상태 유지용 no-op (도트/메타 제거)
                 scroller.addEventListener('scroll', () => {}, { passive: true });
