@@ -49,9 +49,9 @@
         }
         /* No.5: 스냅 비활성화로 자유 스크롤을 부드럽게 */
         .strategy-details.no5-list { scroll-snap-type: none; }
-        /* No.5 전용: 3.5개 카드 보이도록 폭 산출 (컨테이너 기준) */
+        /* No.5 전용: 약 2.5개 카드 보이도록 폭 산출 (컨테이너 기준) */
         .strategy-details.no5-list > div {
-            flex: 0 0 calc((100% - 3 * var(--card-gap, 16px)) / 3.5);
+            flex: 0 0 calc((100% - 2 * var(--card-gap, 16px)) / 2.5);
         }
         /* 모바일에서는 70% 폭으로 카드 연속 노출(2장 이상 동시 시야) */
         @media (max-width: 768px) {
@@ -76,7 +76,8 @@
             .strategy-details.no5-list .strategy-card--detail a { max-width: 100%; }
             .strategy-details.no5-list .strategy-card--detail img { width: 100%; }
         }
-        .strategy-details > div.is-minimized img {
+        .strategy-details > div.is-minimized img,
+        .strategy-card--primary.is-minimized img {
             filter: grayscale(100%);
         }
         /* 카드 기본 규칙 */
@@ -327,35 +328,45 @@
             </div>
             <div class="strategy-scroll no5-scroll">
                 <div class="strategy-details no5-list">
+                    <div class="strategy-card strategy-card--detail variant-b frame-recommend">
+                        <h3>Strategy No.5-3 Performance</h3>
+                        <a href="https://gony0-tradingbot.github.io/qs/no5/st3_report.png" target="_blank">
+                            <img src="https://github.com/gony0-tradingbot/gony0-tradingbot.github.io/blob/main/qs/no5/st3_report.png?raw=true" alt="Strategy No.5-3 Performance Graph">
+                        </a>
+                        <p><a class="detail-link" href="https://gony0-tradingbot.github.io/qs/no5/st3_report.html">View No.5-3 Details (QuantStats📈)</a></p>
+                    </div>
+                    <div class="strategy-card strategy-card--detail variant-b frame-recommend">
+                        <h3>Strategy No.5-5 Performance</h3>
+                        <a href="https://gony0-tradingbot.github.io/qs/no5/st5_report.png" target="_blank">
+                            <img src="https://github.com/gony0-tradingbot/gony0-tradingbot.github.io/blob/main/qs/no5/st5_report.png?raw=true" alt="Strategy No.5-5 Performance Graph">
+                        </a>
+                        <p><a class="detail-link" href="https://gony0-tradingbot.github.io/qs/no5/st5_report.html">View No.5-5 Details (QuantStats📈)</a></p>
+                    </div>
+                    <div class="strategy-card strategy-card--detail variant-b frame-recommend">
+                        <h3>Strategy No.5-6 Performance</h3>
+                        <a href="https://gony0-tradingbot.github.io/qs/no5/st6_report.png" target="_blank">
+                            <img src="https://github.com/gony0-tradingbot/gony0-tradingbot.github.io/blob/main/qs/no5/st6_report.png?raw=true" alt="Strategy No.5-6 Performance Graph">
+                        </a>
+                        <p><a class="detail-link" href="https://gony0-tradingbot.github.io/qs/no5/st6_report.html">View No.5-6 Details (QuantStats📈)</a></p>
+                    </div>
+                    <div class="strategy-card strategy-card--detail variant-b frame-recommend">
+                        <h3>Strategy No.5-7 Performance</h3>
+                        <a href="https://gony0-tradingbot.github.io/qs/no5/st7_report.png" target="_blank">
+                            <img src="https://github.com/gony0-tradingbot/gony0-tradingbot.github.io/blob/main/qs/no5/st7_report.png?raw=true" alt="Strategy No.5-7 Performance Graph">
+                        </a>
+                        <p><a class="detail-link" href="https://gony0-tradingbot.github.io/qs/no5/st7_report.html">View No.5-7 Details (QuantStats📈)</a></p>
+                    </div>
                     <div class="strategy-card strategy-card--detail variant-b frame-recommend is-minimized">
-                    <h3>Strategy No.5-1 Performance</h3>
-                    <a href="https://gony0-tradingbot.github.io/qs/no5/st1_report.png" target="_blank">
-                        <img src="https://github.com/gony0-tradingbot/gony0-tradingbot.github.io/blob/main/qs/no5/st1_report.png?raw=true" alt="Strategy No.5-1 Performance Graph">
-                    </a>
-                        <p class="status-badge"><strong>⚠️ Minimized since Jul ’24 (MDD breach)</strong></p>
-                    <p><a class="detail-link" href="https://gony0-tradingbot.github.io/qs/no5/st1_report.html">View No.5-1 Details (QuantStats📈)</a></p>
-                </div>
-                    <div class="strategy-card strategy-card--detail variant-b frame-recommend">
-                    <h3>Strategy No.5-3 Performance</h3>
-                    <a href="https://gony0-tradingbot.github.io/qs/no5/st3_report.png" target="_blank">
-                        <img src="https://github.com/gony0-tradingbot/gony0-tradingbot.github.io/blob/main/qs/no5/st3_report.png?raw=true" alt="Strategy No.5-3 Performance Graph">
-                    </a>
-                    <p><a class="detail-link" href="https://gony0-tradingbot.github.io/qs/no5/st3_report.html">View No.5-3 Details (QuantStats📈)</a></p>
-                </div>
-                    <div class="strategy-card strategy-card--detail variant-b frame-recommend">
-                    <h3>Strategy No.5-5 Performance</h3>
-                    <a href="https://gony0-tradingbot.github.io/qs/no5/st5_report.png" target="_blank">
-                        <img src="https://github.com/gony0-tradingbot/gony0-tradingbot.github.io/blob/main/qs/no5/st5_report.png?raw=true" alt="Strategy No.5-5 Performance Graph">
-                    </a>
-                    <p><a class="detail-link" href="https://gony0-tradingbot.github.io/qs/no5/st5_report.html">View No.5-5 Details (QuantStats📈)</a></p>
-                </div>
-                    <div class="strategy-card strategy-card--detail variant-b frame-recommend">
-                    <h3>Strategy No.5-6 Performance</h3>
-                    <a href="https://gony0-tradingbot.github.io/qs/no5/st6_report.png" target="_blank">
-                        <img src="https://github.com/gony0-tradingbot/gony0-tradingbot.github.io/blob/main/qs/no5/st6_report.png?raw=true" alt="Strategy No.5-6 Performance Graph">
-                    </a>
-                    <p><a class="detail-link" href="https://gony0-tradingbot.github.io/qs/no5/st6_report.html">View No.5-6 Details (QuantStats📈)</a></p>
-                </div>
+                        <h3>Strategy No.5-1 Performance</h3>
+                        <a href="https://gony0-tradingbot.github.io/qs/no5/st1_report.png" target="_blank">
+                            <img src="https://github.com/gony0-tradingbot/gony0-tradingbot.github.io/blob/main/qs/no5/st1_report.png?raw=true" alt="Strategy No.5-1 Performance Graph">
+                        </a>
+                            <p class="status-badge">
+                            <strong>🔴 Terminated Aug '25</strong><br>
+                            <span style="font-size:0.9em; opacity:0.8;">⚠️ Minimized since Jul '24, MDD breach</span>
+                        </p>
+                        <p><a class="detail-link" href="https://gony0-tradingbot.github.io/qs/no5/st1_report.html">View No.5-1 Details (QuantStats📈)</a></p>
+                    </div>
                 </div>
                 <div class="scroll-hint" aria-hidden="true">
                     <span class="chev left">&lt;</span>
@@ -366,11 +377,15 @@
             </div>
         </section>
         <section>
-            <div class="strategy-card strategy-card--primary variant-b frame-recommend">
+            <div class="strategy-card strategy-card--primary variant-b frame-recommend is-minimized">
                 <h2>Strategy No.3 Performance</h2>
                 <a href="https://gony0-tradingbot.github.io/qs/no3.png" target="_blank">
                     <img src="https://github.com/gony0-tradingbot/gony0-tradingbot.github.io/blob/main/qs/no3.png?raw=true" alt="Strategy No.3 Performance Graph">
                 </a>
+                <p class="status-badge">
+                    <strong>⚠️ Minimized since Jun '25</strong><br>
+                    <span style="font-size:0.9em; opacity:0.8;">⚠️ Not operating properly since (no margin/balance)</span>
+                </p>
                 <p><a class="detail-link" href="https://gony0-tradingbot.github.io/qs/no3.html">View No.3 Details (QuantStats📈)</a></p>
             </div>
         </section>
