@@ -33,22 +33,18 @@
             overflow-x: auto;
             overflow-y: hidden;
             padding-bottom: 8px;
-            scroll-snap-type: x proximity;
             -webkit-overflow-scrolling: touch;
             touch-action: auto;
             -ms-overflow-style: none; /* IE/Edge */
             scrollbar-width: none;    /* Firefox */
-            scroll-behavior: smooth;
+            scroll-behavior: auto; /* 부드러운 스크롤 비활성화 - 관성 스크롤이 처리 */
         }
         .strategy-details::-webkit-scrollbar { /* Chrome/Safari */
             display: none;
         }
         .strategy-details > div {
-            text-align: left; /* Centers the text and images inside the div */
-            scroll-snap-align: start;
+            text-align: left;
         }
-        /* No.5: 스냅 비활성화로 자유 스크롤을 부드럽게 */
-        .strategy-details.no5-list { scroll-snap-type: none; }
         /* No.5 전용: 약 2.5개 카드 보이도록 폭 산출 (컨테이너 기준) */
         .strategy-details.no5-list > div {
             flex: 0 0 calc((100% - 2 * var(--card-gap, 16px)) / 2.5);
@@ -233,12 +229,15 @@
         }
         .strategy-details {
             cursor: grab;
+            /* GPU acceleration for smooth dragging */
+            will-change: transform;
+            backface-visibility: hidden;
+            perspective: 1000px;
         }
         .strategy-details.dragging {
             cursor: grabbing;
             user-select: none;
             -webkit-user-select: none;
-            scroll-snap-type: none; /* 드래그 중 스냅 비활성화로 부드러운 드래그 */
         }
 
         /* 스크롤 힌트 */
@@ -324,6 +323,7 @@
                 <a href="https://gony0-tradingbot.github.io/qs/no5/portfolio_report.png" target="_blank">
                     <img src="https://github.com/gony0-tradingbot/gony0-tradingbot.github.io/blob/main/qs/no5/portfolio_report.png?raw=true" alt="Strategy No.5 (Portfolio) Performance Graph">
                 </a>
+                <p style="font-size: 0.9em; color: #6b7280; margin: 8px 0 4px 0;">Portfolio combining sub-strategies below with dynamic weights</p>
                 <p><a class="detail-link" href="https://gony0-tradingbot.github.io/qs/no5/portfolio_report.html">View No.5 (Portfolio) Details (QuantStats📈)</a></p>
             </div>
             <div class="strategy-scroll no5-scroll">
@@ -422,38 +422,127 @@
                     scroller.scrollBy({ left: dir * getAmount(), behavior: 'smooth' });
                 };
 
-                // Drag to scroll (mouse)
+                // Drag to scroll (mouse) - GPU-accelerated smooth dragging with momentum
                 let isDown = false;
                 let startX = 0;
                 let startScrollLeft = 0;
                 let moved = false;
+                let scrollerLeft = 0;
+                let currentScroll = 0;
+                let targetScroll = 0;
+                let rafId = null;
+
+                // Momentum variables
+                let velocityX = 0;
+                let lastX = 0;
+                let lastTime = 0;
+                let momentumId = null;
+
+                // Smooth animation loop using RAF for 60fps scrollLeft sync
+                const animate = () => {
+                    if (!isDown && !momentumId) {
+                        rafId = null;
+                        return;
+                    }
+
+                    // Update actual scrollLeft (for scrollbar)
+                    scroller.scrollLeft = targetScroll;
+
+                    rafId = requestAnimationFrame(animate);
+                };
+
+                // Momentum scrolling with friction
+                const applyMomentum = () => {
+                    // Apply friction (0.92 = 8% deceleration per frame)
+                    velocityX *= 0.92;
+
+                    // Stop if velocity is very low
+                    if (Math.abs(velocityX) < 0.5) {
+                        momentumId = null;
+                        return;
+                    }
+
+                    // Update target scroll with velocity
+                    targetScroll -= velocityX;
+
+                    // Clamp to bounds
+                    const maxScroll = scroller.scrollWidth - scroller.clientWidth;
+                    targetScroll = Math.max(0, Math.min(targetScroll, maxScroll));
+
+                    // Continue momentum
+                    momentumId = requestAnimationFrame(applyMomentum);
+                };
 
                 scroller.addEventListener('mousedown', (e) => {
                     // Only left mouse button
                     if (e.button !== 0) return;
                     e.preventDefault();
+
+                    // Stop any ongoing momentum
+                    if (momentumId) {
+                        cancelAnimationFrame(momentumId);
+                        momentumId = null;
+                    }
+
                     isDown = true;
                     moved = false;
                     scroller.classList.add('dragging');
-                    startX = e.clientX - scroller.getBoundingClientRect().left;
+                    scrollerLeft = scroller.getBoundingClientRect().left;
+                    startX = e.clientX - scrollerLeft;
                     startScrollLeft = scroller.scrollLeft;
+                    currentScroll = startScrollLeft;
+                    targetScroll = startScrollLeft;
+
+                    // Reset velocity tracking
+                    velocityX = 0;
+                    lastX = startX;
+                    lastTime = Date.now();
+
+                    // Start RAF loop for scrollLeft sync
+                    if (!rafId) {
+                        rafId = requestAnimationFrame(animate);
+                    }
                 });
-                window.addEventListener('mouseup', () => {
+
+                const stopDrag = () => {
+                    if (!isDown) return;
+
                     isDown = false;
                     scroller.classList.remove('dragging');
-                });
-                scroller.addEventListener('mouseleave', () => {
-                    isDown = false;
-                    scroller.classList.remove('dragging');
-                });
+
+                    // Start momentum if there's significant velocity
+                    if (Math.abs(velocityX) > 0.5) {
+                        momentumId = requestAnimationFrame(applyMomentum);
+                    } else if (rafId) {
+                        cancelAnimationFrame(rafId);
+                        rafId = null;
+                    }
+                };
+
+                window.addEventListener('mouseup', stopDrag);
+                scroller.addEventListener('mouseleave', stopDrag);
+
                 scroller.addEventListener('mousemove', (e) => {
                     if (!isDown) return;
                     e.preventDefault();
-                    const x = e.clientX - scroller.getBoundingClientRect().left;
+
+                    const x = e.clientX - scrollerLeft;
                     const walk = x - startX;
                     if (Math.abs(walk) > 3) moved = true;
-                    scroller.scrollLeft = startScrollLeft - walk;
-                });
+
+                    // Calculate velocity for momentum
+                    const now = Date.now();
+                    const dt = now - lastTime;
+                    if (dt > 0) {
+                        const dx = x - lastX;
+                        velocityX = dx / dt * 16; // pixels per frame (16ms)
+                    }
+                    lastX = x;
+                    lastTime = now;
+
+                    // Update target scroll (RAF loop will sync scrollLeft)
+                    targetScroll = startScrollLeft - walk;
+                }, { passive: false });
 
                 // Touch: 네이티브 가로 스크롤/관성을 그대로 사용 (커스텀 처리 제거)
                 // Prevent clicks on links when user was dragging
